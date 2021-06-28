@@ -10,6 +10,7 @@ from core.tests.test_models import create_mock_user
 
 CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
+ME_URL = reverse('user:me')
 
 
 class PublicUserApiTests(TestCase):
@@ -56,7 +57,7 @@ class PublicUserApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(db_user)
 
-    def test_create_user_bad_method(self):
+    def test_create_user_invalid_method(self):
         """
         should fail to create a user
         due to request with different method than POST
@@ -100,3 +101,69 @@ class PublicUserApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertNotIn('token', res.data)
+
+    def test_retrive_user_unauthenticated(self):
+        """should fail to retrive the user details"""
+        res = self.client.get(ME_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivateUserApiTests(TestCase):
+    """Authenticated users api tests"""
+
+    def setUp(self):
+        self.user = create_mock_user()
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_retrive_user(self):
+        """should retrive the user details"""
+        res = self.client.get(ME_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data['username'], self.user.username)
+        self.assertEqual(res.data['first_name'], self.user.first_name)
+        self.assertEqual(res.data['last_name'], self.user.last_name)
+        self.assertNotIn('password', res.data)
+
+    def test_update_profile_invalid_method(self):
+        """should fail to update user due to POST request"""
+        res = self.client.post(ME_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_update_profile_valid_patch(self):
+        """should update user via PATCH request"""
+        update_fields = {
+            'password': 'NewPassword!',
+            'last_name': 'Picasso'
+        }
+        res = self.client.patch(ME_URL, update_fields)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        self.user.refresh_from_db()
+
+        self.assertTrue(self.user.check_password(update_fields['password']))
+        self.assertEquals(self.user.last_name, update_fields['last_name'])
+
+    def test_update_profile_valid_put(self):
+        """should update user via PUT request"""
+        update_user = {
+            'username': 'NewUsername',
+            'email': 'new@email.com',
+            'password': 'NewPassword!',
+            'first_name': 'Pablo!',
+        }
+        res = self.client.put(ME_URL, update_user)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        self.user.refresh_from_db()
+
+        self.assertTrue(self.user.check_password(update_user['password']))
+        self.assertEquals(self.user.username, update_user['username'])
+        self.assertEquals(self.user.email, update_user['email'])
+        self.assertEquals(self.user.first_name, update_user['first_name'])
+        self.assertFalse(self.user.last_name)

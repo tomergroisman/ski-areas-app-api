@@ -8,7 +8,7 @@ def create_mock_user(
     password='test123'
 ):
     """Create a new mock user"""
-    get_user_model().objects.create_user(
+    return get_user_model().objects.create_user(
         username=username,
         email=email,
         password=password
