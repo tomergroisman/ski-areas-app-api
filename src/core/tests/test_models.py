@@ -22,8 +22,7 @@ class UserModelTests(TestCase):
         self.assertTrue(user.check_password(self.mock_user['password']))
         self.assertEqual(user.email, self.mock_user['email'])
         self.assertFalse(user.is_staff)
-        with self.assertRaises(AttributeError):
-            user.is_superuser
+        self.assertFalse(user.is_superuser)
 
     def test_create_superuser_valid(self):
         """should create a new superuser to the database"""

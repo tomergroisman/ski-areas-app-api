@@ -54,8 +54,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(
+        i18n('ADMIN_USER_ACTIVE'),
+        help_text=i18n('ADMIN_USER_ACTIVE_HELPER_TEXT'),
+        default=True,
+    )
+    is_staff = models.BooleanField(
+        i18n('ADMIN_USER_STAFF_STATUS'),
+        help_text=i18n('ADMIN_USER_STAFF_STATUS_HELPER_TEXT'),
+        default=False
+    )
 
     objects = UserManager()
 
