@@ -2,6 +2,19 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 
 
+def create_mock_user(
+    username='test',
+    email='test@test.com',
+    password='test123'
+):
+    """Create a new mock user"""
+    get_user_model().objects.create_user(
+        username=username,
+        email=email,
+        password=password
+    )
+
+
 class UserModelTests(TestCase):
     """User model tests"""
 

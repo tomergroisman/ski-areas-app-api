@@ -8,4 +8,5 @@ texts = {
   'ADMIN_USER_STAFF_STATUS_HELPER_TEXT': 'Designites whether the user can log into this admin site.',
   'ADMIN_USER_ACTIVE': 'Active',
   'ADMIN_USER_ACTIVE_HELPER_TEXT': 'Designites whether this user should be treated as active. Unselect this instead of deleting accounts.',
+  'AUTH_INVALID_CREDENTIALS': 'Unable to authenticate with provided credentials.',
 }
